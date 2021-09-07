@@ -40,13 +40,13 @@ RESTful API with JSON over HTTP
     }
     ```
 - Search Doc vừa tạo
-    GET /megacorp/employee/_search => search tất cả các doc trong index megacorp, type employee
-    new: GET /megacorp/_doc/_search
+    ```GET /megacorp/employee/_search```=> search tất cả các doc trong index megacorp, type employee
+    new syntax: ``` GET /megacorp/_doc/_search ```
 - Search chính xác doc theo id hay một fields nào đấy
-    GET /megacorp/employee/2
-    GET /megacorp/employee/_search?q=last_name:Smith
+    ```GET /megacorp/employee/2```
+    ```GET /megacorp/employee/_search?q=last_name:Smith```
 - Search with Query DSL: một cách search mạnh mẽ hơn sử dụng JSON request body, VD dưới tương đương với GET /megacorp/employee/_search?q=last_name:Smith
-    GET /megacorp/employee/_search
+   ``` GET /megacorp/employee/_search
     {
         "query" : {
             "match" : {
@@ -54,8 +54,9 @@ RESTful API with JSON over HTTP
             }
         }
     }
+    ```
 - More-Complicated Searches: Tìm kiếm với query phức tạp hơn, VD này tìm tất cả các nhân viên có tên sau là 'smith' và còn phải trên 30 tuổi ('gt' stands for greater than)
-    GET /megacorp/employee/_search
+    ```GET /megacorp/employee/_search
     {
         "query" : {
             "filtered" : {
@@ -72,4 +73,5 @@ RESTful API with JSON over HTTP
             }
         }
     }
+    ```
     
