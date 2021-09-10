@@ -74,4 +74,61 @@ RESTful API with JSON over HTTP
         }
     }
     ```
+- Trong ES hỗ trợ Full Text Search, kết quả sẽ được xếp loại theo trường 'score', score càng cao thì độ tin cậy cho việc tìm kiếm chính xác càng cao VD:
+    ```GET /megacorp/employee/_search
+        {
+            "query" : {
+                "match" : {
+                    "about" : "rock climbing"
+                    }
+                }
+            }
+    ```
+
+- Phrase Search: Sử dụng 'match_phrase' khi bạn muốn tìm kiếm chính xác một từ nào đó trong một câu văn chẳng hạn VD:
+    ```GET /megacorp/employee/_search
+        {
+            "query" : {
+                "match_phrase" : {
+                    "about" : "rock climbing"
+                     }
+                }
+         }
+    ```
+- Highlighting Our Searches: Đơn giản chỉ là tạo hightlight cho kết quả tìm kiếm, đêm kết quả trong trường 'hightlight' vào HTML sẽ thấy sự khác biệt :)
+    ```
+        GET /megacorp/employee/_search
+        {
+            "query" : {
+                "match_phrase" : {
+                    "about" : "rock climbing"
+                     }
+                },
+                "highlight": {
+                    "fields" : {
+                        "about" : {}
+                                }
+                        }
+            }    
+    ```
+- Analytics: Một chức năng kiểu phân tích thống kê data (VD việc xuất ra kết quả thống kê sở thích của nhân viên in company), giống với GROUP BY bên SQL nhưng mạnh hơn VD:
+    ```
+        GET /megacorp/employee/_search
+            {
+                "aggs": {
+                    "all_interests": {
+                        "terms": { "field": "interests" }
+                        }
+                    }
+            }
+    ```
     
+=> Hết chap 1 tìm hiểu những cách tìm kiếm kết quả đơn giản của ES
+
+# Chap 2. Life inside a Cluster (cluster sẽ chưa node
+- Mọi node in cluster đều biết được vị trí của doc, từ yêu càu tìm kiếm ở bất kỳ node nào các node sẽ giao tiếp với nhau để trả về kết quả
+- Có 3 trạng thái của cluster để biết tình hình hoạt động của các cluster (GET /_cluster/health)
+    + Green: Tất cả hoạt động ổn
+    + Yellow: 1 một sô bản sao không hoạt động
+    + Red: 1 số bản chính không hoạt động
+
