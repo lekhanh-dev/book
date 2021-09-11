@@ -125,10 +125,27 @@ RESTful API with JSON over HTTP
     
 => Hết chap 1 tìm hiểu những cách tìm kiếm kết quả đơn giản của ES
 
-# Chap 2. Life inside a Cluster (cluster sẽ chưa node
+# Chap 2. Life inside a Cluster (cluster sẽ chưa node)
 - Mọi node in cluster đều biết được vị trí của doc, từ yêu càu tìm kiếm ở bất kỳ node nào các node sẽ giao tiếp với nhau để trả về kết quả
 - Có 3 trạng thái của cluster để biết tình hình hoạt động của các cluster (GET /_cluster/health)
     + Green: Tất cả hoạt động ổn
     + Yellow: 1 một sô bản sao không hoạt động
     + Red: 1 số bản chính không hoạt động
+- Với cơ chế mở rộng cluster theo chiều ngang, việc tạo ra những phân đoạn bản sao trên nhiều node giúp ES có thể tạo hồi phục lại phân đoạn chính nếu chúng bị mất đi do lỗi phần cứng => đảm bảo dữ liệu luôn được an toàn
 
+# Chap 3. Data In, Data Out
+- Việc biểu diễn các đối tượng trong cuộc sống theo kiểu bảng tính có nhiều bất cập => thay vào đó sử dụng JSON để biểu diễn flexible hơn
+- Trong ES: Document đươc hiểu là đối tượng gốc cao nhất được biểu diễn dưới dạng JSON lưu trong ES với một ID duy nhất
+- Một Doc không chỉ chứa data của riêng nó mà còn các thông tin đi liên quan (metadata) là: index, type, id
+- Mọi Doc đều có số phiên bản (_version)  khi có sự thay đổi trong tài liệu thì nó được tăng lên
+- Khi POST doc nếu ko chỉ định id thì ES tự thêm
+- Mặc định thì GET thì ES sẽ lấy hết các trường của doc, nếu muốn lấy một phần ta use param '_source' VD
+    ``` GET /website/blog/123?_source=title,text ```
+- Sử dụng HEAD method để check doc có tồn tại trong ES ko
+    ``` curl -i -XHEAD http://localhost:9200/website/blog/123 ``` 
+        nếu status code = 200 thì tồn tại, 404 thì ko
+
+- Quy trình mà ES update một doc
+     ``` Get JSON từ doc cũ => Thay đổi nó => delete doc cũ => lập chỉ mục doc mới
+- Delete 1 doc ```DELETE /website/blog/123```: ES sẽ ko xóa ngay mà đánh dấu là đã xóa
+- ES là hệ phân tán, khi doc dc tạo, update, delete thì phiên bản mới của doc đươc sao chép sang các nút khác trong cụm, vì có thể xảy ra trường hợp doc cũ ghi đè doc mới nên ES sử dụng vesion đẻ đảm bảo các thay đổi được áp dụng đúng theo thứ tự
