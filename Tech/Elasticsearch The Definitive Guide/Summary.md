@@ -149,3 +149,10 @@ RESTful API with JSON over HTTP
      ``` Get JSON từ doc cũ => Thay đổi nó => delete doc cũ => lập chỉ mục doc mới
 - Delete 1 doc ```DELETE /website/blog/123```: ES sẽ ko xóa ngay mà đánh dấu là đã xóa
 - ES là hệ phân tán, khi doc dc tạo, update, delete thì phiên bản mới của doc đươc sao chép sang các nút khác trong cụm, vì có thể xảy ra trường hợp doc cũ ghi đè doc mới nên ES sử dụng vesion đẻ đảm bảo các thay đổi được áp dụng đúng theo thứ tự
+
+# Chap 4. Distributed Document Store
+- Cách dữ liệu được lưu trong một hệ thống phân tán
+- Mô tả cách create, index, delete một doc
+    + Đầu tiên máy khách gửi yêu cầu đến một nút, tại nút đó dựa vào _id để xác định xem doc ở shards nào rồi gửi yêu cầu lại cho shard đó, tại shard chính nó sẽ gửi yêu cầu song song tới các shard bản sao, nếu thành công các shard bản sao gửi lại báo cáo thành công cho shard chính => shard chính gửi msg success cho shard ban đầu => rồi từ đó gửi thông báo thành công cho client
+- Mặc định quy trình phản hồi từ clent > shard chính > shard sao là sync nhưng có thể thay đổi thành async cho nhanh hơn nhưng ES ko khuyến khích điều này
+- Với yêu cầu đọc, nút yêu cầu sẽ vòng qua các shard bản sao, nếu tài liệu đó có trên shard chính nhưng chưa có trên shard bản sao => sau khi request index thành công thì doc sẽ có sẵn trên cả shard chính và shard bản sao.
