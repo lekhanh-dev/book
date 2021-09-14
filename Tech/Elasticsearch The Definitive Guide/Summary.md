@@ -156,3 +156,56 @@ RESTful API with JSON over HTTP
     + Đầu tiên máy khách gửi yêu cầu đến một nút, tại nút đó dựa vào _id để xác định xem doc ở shards nào rồi gửi yêu cầu lại cho shard đó, tại shard chính nó sẽ gửi yêu cầu song song tới các shard bản sao, nếu thành công các shard bản sao gửi lại báo cáo thành công cho shard chính => shard chính gửi msg success cho shard ban đầu => rồi từ đó gửi thông báo thành công cho client
 - Mặc định quy trình phản hồi từ clent > shard chính > shard sao là sync nhưng có thể thay đổi thành async cho nhanh hơn nhưng ES ko khuyến khích điều này
 - Với yêu cầu đọc, nút yêu cầu sẽ vòng qua các shard bản sao, nếu tài liệu đó có trên shard chính nhưng chưa có trên shard bản sao => sau khi request index thành công thì doc sẽ có sẵn trên cả shard chính và shard bản sao.
+
+# Chap 5. Searching - The basic tools
+-The empty search: Trả về tất cả các doc và indices trong cluters
+    ``` GET /_search ```
+   VD result:
+   ``` 
+        {
+            "hits" : {
+                "total" : 14,
+                "hits" : [
+                   {
+                        "_index":"us",
+                        "_type":"tweet",
+                        "_id":"7",
+                        "_score":1,
+                        "_source": {
+                            "date":"2014-09-17",
+                            "name":"John Smith",
+                            "tweet":"The Query DSL is really powerful and flexible",
+                            "user_id": 2
+                        }
+                    },
+                ],
+                "max_score" : 1
+            },
+            "took" : 4,
+            "_shards" : {
+                "failed" : 0,
+                "successful" : 10,
+                "total" : 10
+            },
+            "timed_out" : false
+        }
+   ```
+    + Tìm kiếm tất cả nên score mặc định là 1
+    +  Took: Thời gian thực thi query (milliseconds)
+    +  shards: cho biết tổng số phân đoạn liên quan đến doc, số shard bị fail, success
+    +  timeout: Nếu muốn trả những kết quả có thể trong một khoảng thời gian cho phép. 
+            ``` GET /_search?timeout=10ms ```
+- Các kiểu search
+    ```/_search``` : Search all type in all indices
+    ```/gb/_search``` : Search all type in gb indices
+    ```/gb,us/_search``` : Search all type in gb and us indices
+    ```/g*,u*/_search``` : Search all type in indices mà bắt đầu bằng kí tự g và u
+    + Truy vấn phân trang
+    ```GET /_search?size=5&from=10``` : Số lượng kết quả trả về là 5, và bắt đầu từ kết quả số 10
+
+# Chap 6. Mapping and Analysis
+- Cách xem cấu trúc tài liệu của một type (VD: type tweet of gb indices)
+    ```GET /gb/_mapping/tweet```
+- Data in ES dc chia thành 2 loại: Giá trị chính xác và full-text
+- Giá trị full-text là một kiểu giá trị phi cấu trúc, thường muốn tìm những data trong doc có sự liên quan đến giá trị này
+(Inverted Index|81)
