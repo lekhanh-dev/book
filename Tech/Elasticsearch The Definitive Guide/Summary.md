@@ -208,4 +208,16 @@ RESTful API with JSON over HTTP
     ```GET /gb/_mapping/tweet```
 - Data in ES dc chia thành 2 loại: Giá trị chính xác và full-text
 - Giá trị full-text là một kiểu giá trị phi cấu trúc, thường muốn tìm những data trong doc có sự liên quan đến giá trị này
-(Inverted Index|81)
+- ES sử dụng kỹ thuật `Inverted Index` để tìm kiếm kiểu full-text một cách nhanh chóng
+    + ES sẽ tách các câu trên thành các từ, và đánh dấu xem những từ đó ở câu nào
+    + Sau đó văn vản tìm kiếm cũng được tách thành các từ, rồi nó sẽ check về sự có mặt của từng tù trong các câu. Tổng hợp lại các từ được đánh dấu nhiều hơn trong câu nào thì câu đó gần với kết quả tìm kiếm
+    + Nhưng có một số trường hợp đặc biệt VD như "Quick" và "quick" rõ ràng nghĩa giống nhau mà áp dụng cách trên thì ko hợp lý => ES đã cho về cùng chữ thường
+    + Nếu la kiểu số nhiều hay số ít trong tiếng Anh chẳng hạn ('fox' and 'foxes') => ES cho số nhiều về số ít
+    + Nếu các từ đồng nghĩa thì cho về một từ gốc 
+
+- Analysis and Analyzers 
+    + Phân tích gồm các việc sau:
+        * Mã hóa văn bản thành các thuật ngữ riêng lể để sử dụng cho `Inverted Index`
+        * Chuẩn hóa các thuật ngữ này về dạng chuẩn để tăng khả năng tìm kiếm (như 3 cái VD ở trên)
+    + Built-in Analyzers:
+
