@@ -219,5 +219,39 @@ RESTful API with JSON over HTTP
     + Phân tích gồm các việc sau:
         * Mã hóa văn bản thành các thuật ngữ riêng lể để sử dụng cho `Inverted Index`
         * Chuẩn hóa các thuật ngữ này về dạng chuẩn để tăng khả năng tìm kiếm (như 3 cái VD ở trên)
-    + Built-in Analyzers:
+    + Built-in Analyzers: ES cung cấp các gói phân tích mà có thể sử dụng trực tiếp
+        * Có câu mẫu sau : `Set the shape to semi-transparent by calling set_trans(5)`
+        * Standard analyzer: Chuẩn mặc định của ES, tách các từ, bỏ dấu câu và lowercase các 
+            set, the, shape, to, semi, transparent, by, calling, set_trans, 5
+        * Simple analyzer: Tách từ giữa các ký tự ko phải là chữ cái
+            set, the, shape, to, semi, transparent, by, calling, set, trans
+        * Whitespace analyzer: Tách từ bằng khoảng trắng
+            Set, the, shape, to, semi-transparent, by, calling, set_trans(5)
+        * Language analyzers: Phân tích cho nhiều ngôn ngữ, VD tiếng Anh: nó bỏ đi các giới từ, mạo từ như 'the', 'to', 'or',...
+            set, shape, semi, transpar, call, set_tran, 5
+    + When Analyzers Are Used: Khi index một doc, các trường của full-text được phân tich dựa vào chuẩn đang đc sử dụng để tạo inverted index
+        * Khi truy vân full-text thì nó sẽ áp dụng cùng một kiểu phân tích cho query string, còn truy vấn exact-value thì không
+    + Testing Analyzers: ES cho xem cách một string được phân tích như thế nào bằng call API để xem kêt quả
+        ``` GET /_analyze?analyzer=standard
+            Text to analyze
+        ```
+        API đang thực hiện kêt quả string 'Text to analyze' vơi chuẩn là 'standard'
 
+        Result
+
+       ![Screenshot from 2021-09-19 00-03-52](https://user-images.githubusercontent.com/59026656/133896675-a3538b56-2174-4766-a7f0-3e2c670a476a.png)
+
+    + Specifying Analyzers: Thường ES mặc định là ES dạng chuẩn, nếu muốn thay đổi chungs ta sẽ tự phải cấu hình bằng mapping
+
+- Mapping
+    + Core Simple Field Types: ES hỗ trợ các loại trường đơn giản sau
+            String: string
+            Whole number: byte , short , integer , long
+            Floating-point: float , double
+            Boolean: boolean
+            Date: date
+        * Khi index một doc mà xuất hiện một trường mới, ES sẽ map dynamic kiểu cho field mới đó 
+    + Viewing the Mapping: Xem các field có kiểu dữ liệu gi
+        ``` GET /gb/_mapping/tweet```
+        
+        ![c](https://user-images.githubusercontent.com/59026656/133897450-f5bbe137-72db-4778-b1fc-20b795d34dc0.png)
