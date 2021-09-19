@@ -255,3 +255,53 @@ RESTful API with JSON over HTTP
         ``` GET /gb/_mapping/tweet```
         
         ![c](https://user-images.githubusercontent.com/59026656/133897450-f5bbe137-72db-4778-b1fc-20b795d34dc0.png)
+
+    + Customizing Field Mappings
+        * Thuộc tính quan trọng nhất trong một field là type, đối với các trường khác string sẽ hiếm khi phải map
+        * 2 thuộc tính quan trọng trong 1 field có type là string là: index và analyzer
+        * Đối với index sẽ control cách string dc đánh chỉ mục, có 3 value:
+            1. analyzed: Phân tích sting sau đó index => as fulltext
+            2. not_analyzed: Lập chỉ mục chính xác giá trị đã được chỉ định, ko phân tích nó
+            3. no: Không lập chỉ mục trường này, trường này sẽ không thể tìm kiếm được
+            
+            VD 
+            ```
+                {
+                    "tag": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    }
+                }
+            ```
+        * Đối với analyzer: Thuộc tính này chỉ định máy phân tích nào được áp dụng khi tìm kiếm và lập chỉ mục, VD sử dụng máy phân tích tiếng anh
+            ```
+                {
+                    "tweet": {
+                        "type": "string",
+                        "analyzer": "english"
+                    }
+                }
+
+            ```
+        * Updating a Mapping: Có thể thêm một mapping đến một new type hoặc update map của type đã tồn tại sử dụng endpoint /_mapping, nếu một trường đã mappinng
+                              có thể data của field đõ đã đc index, nếu thay đổi field mapping, data dc index sẽ sai và ko thể tìm kiếm đúng.
+                              Có thể cập nhập map để thêm new field, nhưng ko thể thay đổi field đã tồn tại từ analyzed to not_analyzed
+                  VD update mapping
+                    1. Xóa index db : `DELETE /gb`
+                    2. Tạo index mới, chỉ định trường tweet sẽ use english analyzer
+
+            ![Screenshot from 2021-09-20 00-51-26](https://user-images.githubusercontent.com/59026656/133937667-b4c948fc-3a51-4a17-8186-6a43b6a6be8a.png)
+                    3. Thêm field 'tag' mới vào tweet
+
+                    ```
+                        PUT /gb/_mapping/tweet
+                        {
+                            "properties" : {
+                                "tag" : {
+                                "type" : "string",
+                                "index": "not_analyzed"
+                                }
+                            }
+                        }
+                    ```
+        * Testing the Mapping
