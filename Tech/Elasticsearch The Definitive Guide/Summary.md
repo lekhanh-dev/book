@@ -304,6 +304,8 @@ RESTful API with JSON over HTTP
                             }
                         }
                     ```
+
+
         * Testing the Mapping:
                ```
                     GET /gb/_analyze?field=tweet
@@ -372,4 +374,4 @@ RESTful API with JSON over HTTP
                      "followers.name": [alex, jones, lisa, smith, mary, white]
                 }
             ```
-                Câu hỏi: Nếu bị index như này khi ta hỏi có ai 26 tuổi và tên là Alex Jones? Sẽ được trả lời trong chap 41
+                Câu hỏi: Nếu bị index như này khi ta hỏi có ai 26 tuổi và tên là Alex Jones thì ÉS xử lý như nào ? Sẽ được trả lời trong chap 41
