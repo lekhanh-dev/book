@@ -304,4 +304,72 @@ RESTful API with JSON over HTTP
                             }
                         }
                     ```
-        * Testing the Mapping
+        * Testing the Mapping:
+               ```
+                    GET /gb/_analyze?field=tweet
+                    Black-cats
+               ```
+    + Complex Core Field Types
+        * Ngoài các kiểu dữ liệu đơn giản, JSON in ES còn hỗ trợ kiểu null, array, object
+        * Multivalue Fields: Thay vì một chuỗi, chũng ta có thể index bằng một array
+             ```  { "tag": [ "search", "nosql" ]} ```  
+             1. Các giá trị trong mảng phải cùng kiểu dữ liệu
+        * Empty Fields: Các gia trị dưới đây sẽ coi là trường trống và không được đánh chỉ mục
+             ```        
+                    "null_value": null,
+                    "empty_array": [],
+                    "array_with_null_value": [ null ]
+             ```
+        * Multilevel Objects: Kiểu đối tượng
+            ``` 
+                    {
+                        "tweet": "Elasticsearch is very flexible",
+                        "user": {
+                                "id": "@johnsmith",
+                                "gender": "male",
+                                "age": 26,
+                                "name": {
+                                    "full": "John Smith",
+                                    "first": "John",
+                                    "last": "Smith"
+                                }
+                        }
+                    }
+            ```
+        * Mapping for Inner Objects: ES tự phát hiện những trường đối tượng mới và tự động định kiểu type là object
+                
+            ![c](https://user-images.githubusercontent.com/59026656/134219190-b6ef161c-d897-4c41-b09b-5b610d081223.png)
+           (1) Root object
+           (2) Inner object
+        * How Inner Objects are Indexed: Với data thêm vào ở mục `Multilevel Objects` dưới dây là cách mà ES index for one object
+            ```
+                    {
+                        "tweet":[elasticsearch, flexible, very],
+                        "user.id":[@johnsmith],
+                        "user.gender":[male],
+                        "user.age":[26],
+                        "user.name.full":[john, smith],
+                        "user.name.first": [john],
+                        "user.name.last":[smith]
+                    }
+            ```
+            Để phân biệt những trường cùng tên nó sẽ lây đường dẫn đầy đủ
+        * Arrays of Inner Objects: Dưới dây là cách mà các obj in array đc index
+            data:
+            ```
+                {
+                     "followers": [
+                        { "age": 35, "name": "Mary White"},
+                        { "age": 26, "name": "Alex Jones"},
+                        { "age": 19, "name": "Lisa Smith"}
+                    ]
+                }
+            ```
+            dc index: 
+            ```
+                {
+                     "followers.age": [19, 26, 35],
+                     "followers.name": [alex, jones, lisa, smith, mary, white]
+                }
+            ```
+                Câu hỏi: Nếu bị index như này khi ta hỏi có ai 26 tuổi và tên là Alex Jones? Sẽ được trả lời trong chap 41
