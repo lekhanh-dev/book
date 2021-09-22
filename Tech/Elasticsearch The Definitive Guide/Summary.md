@@ -375,3 +375,76 @@ RESTful API with JSON over HTTP
                 }
             ```
                 Câu hỏi: Nếu bị index như này khi ta hỏi có ai 26 tuổi và tên là Alex Jones thì ÉS xử lý như nào ? Sẽ được trả lời trong chap 41
+
+# Chap 7. Full-Body Search
+    - Nên dùng Body search hơn query string search to tìm kiếm được hiểu quả hơnm, dễ đọc đễ hiểu
+    1. Empty Search
+        - Là cách tìm kiếm tất cả các doc trong một hoặc nhiều indices, type, có thể sử dụng form, size to pagination.
+            ```
+                GET /_search
+                {}
+            ```
+                GET /_search
+                {
+                    "from": 30,
+                    "size": 10
+                }
+            ```
+        - Vì GET api ko được hỗ trợ cho tất cả, nên có thẻ sử dụng POST để get data
+            ```
+                POST /_search
+                {
+                    "from": 30,
+                    "size": 10
+                }
+            ```
+    2. Query DSL
+        - Query DSL là một ngôn ngữ tìm kiếm linh hoạt, nó làm truy vấn chính xác, dễ đọc, đễ gỡ lỗi
+                ```
+                    GET /_search
+                    {
+                        "query": YOUR_QUERY_HERE
+                    }
+                ```
+        - Structure of a Query Clause: Cấu trúc của một mệnh đề truy vấn
+                ```
+                    {
+                        QUERY_NAME: {
+                            ARGUMENT: VALUE,
+                            ARGUMENT: VALUE,...
+                        }
+                    }
+                ```
+            * Tham chiếu đến môt trường cụ thể có cấu trúc sau
+                ```
+                    {
+                        QUERY_NAME: {
+                            FIELD_NAME: {
+                                ARGUMENT: VALUE,
+                                ARGUMENT: VALUE,...
+                            }
+                        }
+                    }
+                ```
+            * VD: Tìm kiếm trong trường tweet
+                ```
+                    {
+                      GET /_search
+                        {
+                            "query": {
+                                "match": {
+                                "tweet": "elasticsearch"
+                                }
+                            }
+                        }
+                    }
+                ```
+        - Combining Multiple Clauses: Sử dụng cho những truy vẫn phức tạp, dưới đây là VD cho việc tìm kiếm email => thấy phức tạp thật, sẽ đc giải thích chi tiết vể các field ở phần sau
+   ![c](https://user-images.githubusercontent.com/59026656/134396108-168a8b29-7c0e-49cc-9fc4-dc5d7f56e1c7.png)
+    
+    3. Queries and Filters
+        - Có 2 loại Query DSL và filter DSL => tương tự nhau, có một chút khác biệt
+        - filter để trả lời cho câu hỏi yes/no (giá trị chính xác)
+        - query để trả lời câu hỏi: Làm sao để doc này match (giá trị toàn văn)
+        - filter dc cache nên hiệu suất cao hơn, mục đích là để giảm số lượng doc phải kiểm tra bằng query
+        
