@@ -447,4 +447,62 @@ RESTful API with JSON over HTTP
         - filter để trả lời cho câu hỏi yes/no (giá trị chính xác)
         - query để trả lời câu hỏi: Làm sao để doc này match (giá trị toàn văn)
         - filter dc cache nên hiệu suất cao hơn, mục đích là để giảm số lượng doc phải kiểm tra bằng query
+    
+    4. Most Important Queries and Filters
+        - Term filter: Được sử dụng để lọc chính xác giá trị, chúng có thể là số, date, bool, or những string (exact-value) ko dc phân tích
+
+   ![Screenshot from 2021-09-25 00-31-44](https://user-images.githubusercontent.com/59026656/134716955-f32784ab-b8ff-48ef-aaa1-08c0481b0df5.png)
+
+        - Terms Filter: Tương tự như tern filter nhưng cho phép match nhiều giá trị
+            ```
+                { "terms": { "tag": [ "search", "full_text", "nosql" ] }}
+            ```
+        - Range Filter: Tìm số or ngày tháng trong một khoảng nào đo
+            ```
+                {
+                    "range": {
+                        "age": {
+                            "gte": 20,
+                            "lt": 30
+                        }
+                    }
+                }
+            ```
+            note: gt: Lớn hơn
+                  gte: lớn hơn or bằng
+                  lt: nhỏ hơn
+                  lte: nhỏ hơn hoặc bằng
+
+        - exists and missing Filters: Kiểu lọc các doc có chứa những trường này (exists) hoặc lọc các doc mà có các trường này null (missing)
+            ```
+                {
+                    "exists":
+                        {
+                            "field": "title"
+                        }
+                }
+            ```
+        - Bool Filter: Sử dụng để kết hợp nhiều filter với nhau, nó có 3 tham số
+            * must: phải match all
+            * must_not: không match all
+            * should: ít nhất 1 trong các mệnh đề phải match
+            
+   ![c](https://user-images.githubusercontent.com/59026656/134720490-f4adf705-2976-4475-9bc7-28992918d28d.png)
+        
+        - Match_all Query: là truy vấn match với tất cả các tài liệu, mặc định dc sử dụng nếu ko có truy vấn nào được chỉ định
+            ```
+                { "match_all": {}}
+            ```
+            * thường đc sử dụng kết hợp với một bộ lọc VD lấy all email in hộp thư đến
+        - Match Query:Là một truy vấn chuẩn khi muốn query a full-text or a exact-value, Khi thực hiện một truy vấn match query với một field full-text, nó sẽ phân tích trc rồi mới tìm
+            ``` { "match": { "tweet": "About Search" }} ```
+        - Multi_match Query:Cho phép match queue trên nhiều trường
+            ```
+                {
+                    "multi_match": {
+                        "query": full text search",
+                        "fields":  "title", "body" ]
+                    }
+                }
+            ```
         
