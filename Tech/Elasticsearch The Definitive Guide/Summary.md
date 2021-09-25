@@ -505,4 +505,121 @@ RESTful API with JSON over HTTP
                     }
                 }
             ```
-        
+    5. Combining Queries with Filters
+        - Filtering a Query   
+            Có query sau: ```{ "match": { "email": "business opportunity" }}```
+            Giờ muôn kết hợp với bộ lọc sau: ```{ "term": { "folder": "inbox" }}```
+            Vì API chỉ chấp nhận một tham số duy nhất nên ta cần lồng nó vào => dc gọi là truy vấn đã lọc
+                ```
+                        {
+                            "filtered": {
+                                "query": { "match": { "email": "business opportunity" }},
+                                "filter": { "term": { "folder": "inbox" }}
+                            }
+                        }
+                ```
+            Truy vấn đầy đủ sẽ là:
+                ```
+                        GET /_search
+                        {
+                            "query": {
+                                "filtered": {
+                                    "query": { "match": { "email": "business opportunity" }},
+                                    "filter": { "term": { "folder": "inbox" }}
+                                }
+                            }
+                        }
+                ```
+         
+        - Just a Filter: Trong query context có thể Sử dụng bộ lọc không có truy vấn
+                ```
+                        GET /_search
+                        {
+                            "query": {
+                                "filtered": {
+                                    "filter": { "term": { "folder": "inbox" }}
+                                }
+                            }
+                        }
+                ```
+                khi truy vấn ko dc chỉ định nó mặc định là match_all
+                ```
+                        GET /_search
+                        {
+                            "query": {
+                                "filtered": {
+                                    "query": { "match_all": {}},
+                                    "filter": { "term": { "folder": "inbox" }}
+                                }
+                            }
+                        }
+                ```
+        - A Query as a Filter: Sử dụng query in ngữ cảnh filter VD: Bỏ thư rác
+                ```
+                    GET /_search
+                    {
+                        "query": {
+                            "filtered": {
+                                "filter": {
+                                    "bool": {
+                                        "must": { "term": { "folder": "inbox" }},
+                                        "must_not": {
+                                            "query": {
+                                                "match": { "email": "urgent business proposal" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ```
+                => Hiếm khi sử dụng kiểu này, sử dụng cho trường hợp cần match full-text trong ngữ cảnh bộ lọc
+           
+    6. Validating Queries : Dùng để kiểm tra truy vấn có hợp lệ hay ko
+            ```
+                GET /gb/tweet/_validate/query
+                {
+                    "query": {
+                        "tweet" : {
+                            "match" : "really powerful"
+                        }
+                    }
+                }
+            ```
+            Result cho thấy là ko hợp lệ
+            ```
+                {
+                    "valid" : false,
+                    "_shards" : {
+                        "total" : 1,
+                        "successful" : 1,
+                        "failed" : 0
+                    }
+                }
+            ```
+        -Understanding Errors: Thêm tham số explain để biết tại sao ko hợp lệ
+            ```
+                GET /gb/tweet/_validate/query?explain
+                {
+                    "query": {
+                        "tweet" : {
+                            "match" : "really powerful"
+                        }
+                    }
+                }
+            ```
+        - Understanding Queries
+            ```
+                GET /_validate/query?explain
+                {
+                    "query": {
+                        "match" : {
+                            "tweet" : "really powerful"
+                        }
+                    }
+                }
+            ```
+            Sẽ dc kết quả giải thích cho câu truy vấn trên, nó giải thích cho từng index, vì mỗi index có cách map và dc phân tích khác nhau
+
+![c](https://user-images.githubusercontent.com/59026656/134782358-3bf03eaf-e310-4609-8f08-ea0520edbf31.png)
