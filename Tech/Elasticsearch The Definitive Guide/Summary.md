@@ -623,3 +623,77 @@ RESTful API with JSON over HTTP
             Sẽ dc kết quả giải thích cho câu truy vấn trên, nó giải thích cho từng index, vì mỗi index có cách map và dc phân tích khác nhau
 
 ![c](https://user-images.githubusercontent.com/59026656/134782358-3bf03eaf-e310-4609-8f08-ea0520edbf31.png)
+
+# Chap 8. Sorting and Relevance
+    1. Sorting
+        - Trong ES Điểm liên quan của doc sẽ được tính vào trường _score (float), mặc định độ này sẽ giảm dần
+        - Đối với filter nó sẽ không tính score, mặc định các giá của _score là 1
+        a. Sorting by Field Values: Để sắp xếp kết quả trả về theo field
+            VD: Sắp xếp các tweet theo thời gian giẩm dần
+            ```
+                GET /_search
+                {
+                     "query" : {
+                         "filtered" : {
+                         "filter" : { "term" : { "user_id" : 1 }}
+                         }
+                     },
+                     "sort": { "date": { "order": "desc" }}
+                }
+            ```
+            Result
+            - Kết quả sẽ ko dc tính điểm score, vì trong trường hợp này ko cần thiết phải tính score, nếu muốn tính đặt thuộc tính track_scores = true
+            - date sẽ đc convert về mini second để sắp xếp
+            ![Capture](https://user-images.githubusercontent.com/59026656/134828090-ce87273e-b713-4c0b-ba61-1e504a4b4c11.PNG)
+            
+        b. Multilevel Sorting: Kết hợp vừa sắp xếp theo ngày, vừa tính độ liên quan _score
+            ```
+                GET /_search
+                {
+                    "query" : {
+                        "filtered" : {
+                            "query": { "match": { "tweet": "manage text search" }},
+                            "filter" : { "term" : { "user_id" : 2 }}
+                        }
+                    },
+                    "sort": [
+                        { "date": { "order": "desc" }},
+                        { "_score": { "order": "desc" }}
+                    ]
+                }
+            ```
+        c. Sorting on Multivalue Fields: Với các trường có nhiều hơn một giá trị, ta có thể reduce nó về 1 giá trị để sắp xếp, sử dụng các hàm như min, max, avg, sum, ...
+            ```
+                "sort": {
+                    "dates": {
+                        "order": "asc",
+                        "mode": "min"
+                    }
+                }
+            ```
+    2. String Sorting and Multifelds
+        Khi sort string có sự đặc biệt là string đó ko dc phân tích(not_analyzed), cách đơn giản là lập chỉ mục cùng một chuỗi theo 2 cách, 1 trường sẽ dc phân tích để tìm kiếm, trường còn lại sẽ ko được phân tích để sắp xếp, tuy nhiên cách này gây tiêu tốn tài nguyên, có thẻ sử dụng một trường phụ từ trường chính, trường phụ này sẽ ko dc index để phục vụ cho sắp xếp
+            ```
+                "tweet": {
+                    "type": "string",
+                    "analyzer": "english",
+                    "fields": {
+                        "raw": {
+                            "type": "string",
+                            "index": "not_analyzed"
+                        }
+                    }
+                }
+            ```
+            Bây giờ có thể tìm kiếm như sau
+            ```
+                GET /_search
+                {
+                    "query": {
+                        "match": {
+                            "tweet": "elasticsearch"
+                        }
+                    },
+                    "sort": "tweet.raw"
+                }
+            ```
