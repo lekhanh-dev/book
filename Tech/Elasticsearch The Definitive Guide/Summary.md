@@ -697,3 +697,37 @@ RESTful API with JSON over HTTP
                     "sort": "tweet.raw"
                 }
             ```
+    3. What Is Relevance
+        - _score càng cao, sự phù hợp của doc càng lớn
+        - Mỗi một query sẽ tạo ra _score cho mỗi doc
+        - Mỗi kiểu query khác nhau => _score sẽ khác nhau
+        - Thường áp dụng _score cho full-text search
+        - Trong ES có các thuật toán tiêu chuẩn sau để tính toán score
+            Term frequency: Từ xuất hiện trong field càng nhiều => _score càng cao
+            Inverse document frequency: Từ xuất hiện càng nhiều trong index => _score càng thấp
+            Field-length norm: Nội dung của trường càng dài khả năng phù hợp càng thấp so với 1 field ngắn
+        - Khi kết hợp với query bool, _score của query cũng được cho vào để tính toán cùng 
+        * Understanding the Score : Thêm tham số explain để xem giải thích _score của doc dc tính ntn
+            ```
+                GET /_search?explain
+                {       
+                    "query" : { "match" : { "tweet" : "honeymoon" }}
+                }
+            ```
+          - Khi chạy request trên nó sẽ hiển thị các thông tin về doc tìm dc, và thêm 1 trường là _explanation, tại đây sẽ trình bày các score dc tính toán dựa trên các thuật toán tiều chuẩn ở trên, ở mỗi thuật toán dc tính toán score riêng, rồi tính toán score chính cuối cùng
+        * Understanding Why a Document Matched: Xem giải thích cho 1 doc cụ thể
+            ```
+                GET /us/tweet/12/_explain
+                {
+                    "query" : {
+                    "filtered" : {
+                        "filter" : { "term" : { "user_id" : 2}},
+                        "query" : { "match" : { "tweet" : "honeymoon" }}
+                        }
+                    }
+                }
+            ```
+            Ở dây ngoài những thứ đã hiển thị ở phần giải thích cho mọi đoc thì nó hiển thị thêm lý do cho doc cụ thể này 
+                ```"failure to match filter: cache(user_id:[2 TO 2])"``` => lỗi user_id ko có nên ko tìm dc result nào 
+
+                  
