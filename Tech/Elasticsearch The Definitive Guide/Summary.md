@@ -730,4 +730,25 @@ RESTful API with JSON over HTTP
             Ở dây ngoài những thứ đã hiển thị ở phần giải thích cho mọi đoc thì nó hiển thị thêm lý do cho doc cụ thể này 
                 ```"failure to match filter: cache(user_id:[2 TO 2])"``` => lỗi user_id ko có nên ko tìm dc result nào 
 
+# Chap 9. Distributed Search Execution
+1. Query Phase: Khi một yêu cầu tìm kiếm được gửi đến một nút, nó sẽ trở thành nút điều phối gửi yều cầu tìm kiếm tới tất cả các nút khác cùng index, mỗi nút này sẽ thực hiện tìm kiếm cục bộ lưu kết quả (gồm ID tài liệu và một trường để sắp xếp như _score chẳng hạn) vào 1 hàng đợi ưu tiên để gửi lại kết quả cho nút điều phối, kết quả sẽ được hợp nhất tại nút điều phổi và gửi lại cho client
+2. Fetch Phase
+3. Search Options: Một vài tham số chuỗi truy vấn ảnh hưởng đến quá trình tìm kiếm
+    - preference: Kiểm soát phân đoạn nào hoặc nút nào đc sử dụng để xử lý phân đoạn tìm kiếm
+    - timeout: Tránh trường hợp một nút gặp sự cố, làm chậm phản hồi cho tất cả các yêu cầu tìm kiếm, tham số này chỉ định nút điều phối sẽ chỉ chờ một khoảng thời gian rồi trả về kết quả cho client thay vì phải chờ hết tất că các phản hồi
+    - routing: Có thể định tuyến tài liệu liên quan đến nhau trong một phân đoạn (trang 61), lúc tìm kiếm thay vi tìm tất cả các phân đoạn cùng chỉ mục, có thể sử dụng giá trị định tuyến để tìm doc chỉ trên phân đoạn đó
+    - search_type: 
+        + count: Chỉ query để đếm. ko lấy doc result
+        + query_and_fetch: kết hợp giai đoạn truy vấn và tìm nạp thành một, sử dụng tối ưu cho việc tìm kiếm trên một phân đoạn duy nhất
+        + dfs_query_then_fetch and dfs_query_and_fetch: 
+        + scan: 
+4. scan and scroll: thay thế cho việc tìm kiếm bằng from và limit gây ra hiện tượng phân trang sâu => hiệu năng kém
+    ```
+        GET /old_index/_search?search_type=scan&scroll=1m
+        {
+            "query": { "match_all": {}},
+            "size": 1000
+        }
+    ```
+        Kết quả của truy vấn trên sẽ trả về một trường là scroll_id, lấy trường này vào query tiếp theo để lấy những doc kết tiếp
                   
