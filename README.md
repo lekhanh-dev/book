@@ -1,2 +1,2 @@
 # book
-Read book everyday
+Read book everyday.
